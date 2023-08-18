@@ -2,8 +2,6 @@
 
 namespace Rareloop\Router;
 
-use Rareloop\Router\Routable;
-use Rareloop\Router\VerbShortcutsTrait;
 use Spatie\Macroable\Macroable;
 
 class RouteGroup implements Routable
@@ -13,11 +11,13 @@ class RouteGroup implements Routable
     protected $router;
     protected $prefix;
     protected $middleware = [];
+    protected $suffix;
 
     public function __construct($params, $router)
     {
         $prefix = null;
         $middleware = [];
+        $suffix = [];
 
         if (is_string($params)) {
             $prefix = $params;
@@ -25,6 +25,8 @@ class RouteGroup implements Routable
 
         if (is_array($params)) {
             $prefix = $params['prefix'] ?? null;
+            $suffix = $params['sufix'] ?? null;
+
             $middleware = $params['middleware'] ?? [];
 
             if (!is_array($middleware)) {
@@ -35,6 +37,8 @@ class RouteGroup implements Routable
         }
 
         $this->prefix = is_string($prefix) ? trim($prefix, ' /') : null;
+        $this->suffix = $suffix;
+
         $this->router = $router;
     }
 
@@ -43,9 +47,13 @@ class RouteGroup implements Routable
         return $this->prefix . '/' . ltrim($uri, '/');
     }
 
+    private function appendSuffixToUri() {
+		return $this->suffix;
+	}
+
     public function map(array $verbs, string $uri, $callback): Route
     {
-        return $this->router->map($verbs, $this->appendPrefixToUri($uri), $callback)->middleware($this->middleware);
+        return $this->router->map($verbs, $this->appendPrefixToUri($uri) . $this->appendSuffixToUri(), $callback)->middleware($this->middleware);
     }
 
     public function group($params, $callback): RouteGroup
@@ -54,6 +62,7 @@ class RouteGroup implements Routable
             $params = $this->appendPrefixToUri($params);
         } elseif (is_array($params)) {
             $params['prefix'] = $params['prefix'] ? $this->appendPrefixToUri($params['prefix']) : null;
+            $params['suffix'] = $params['suffix'] ?? $this->appendSuffixToUri();
         }
 
         $group = new RouteGroup($params, $this->router);

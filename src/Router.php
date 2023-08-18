@@ -30,6 +30,7 @@ class Router implements Routable
     private $altoRouterMatchTypeId = 1;
     private $basePath;
     private $currentRoute;
+    private $currentRouteParams = null;
 
     private $container = null;
     private $middlewareResolver = null;
@@ -168,6 +169,7 @@ class Router implements Routable
         }
 
         $this->currentRoute = $route;
+        $this->currentRouteParams = $params;
 
         return $this->handle($route, $request, $params);
     }
@@ -266,6 +268,11 @@ class Router implements Routable
     {
         return $this->currentRoute ? $this->currentRoute->getName() : null;
     }
+
+    public function currentRouteParams()
+	{
+		return $this->currentRouteParams ?? new RouteParams([]);
+	}
 
     public function getRoutes()
     {
