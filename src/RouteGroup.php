@@ -62,7 +62,7 @@ class RouteGroup implements Routable
             $params = $this->appendPrefixToUri($params);
         } elseif (is_array($params)) {
             $params['prefix'] = $params['prefix'] ? $this->appendPrefixToUri($params['prefix']) : null;
-            $params['suffix'] = $params['suffix'] ?? $this->appendSuffixToUri();
+            $params['suffix'] = $params['sufix'] ?? $this->appendSuffixToUri();
         }
 
         $group = new RouteGroup($params, $this->router);
